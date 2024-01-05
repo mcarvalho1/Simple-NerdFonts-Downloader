@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Testing a few Linux distros, it was always too much of a hassle to have to download and install them on the system. So I decided to create this script that automates this entire process, so that I could stop wasting so much time customizing my shell or my system.
+Testing various Linux distributions, I consistently found it cumbersome to download and install them on the system. Consequently, I resolved to develop a script that streamlines the entire process, enabling me to avoid expending excessive time on customizing my shell or system.
 
 ## Installation
 
