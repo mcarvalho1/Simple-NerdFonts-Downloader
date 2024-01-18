@@ -31,7 +31,7 @@ To install Nerd Fonts using the script:
 1. Download the script:
 
     ```bash
-    wget https://raw.githubusercontent.com/your-username/Nerd-fonts-Downloader-Script/main/nerd-fonts-downloader.sh
+    wget https://raw.githubusercontent.com/mcarvalho1/Nerd-fonts-Downloader-Script/main/nerd-fonts-downloader.sh
     ```
 
 2. Make the script executable:
