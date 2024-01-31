@@ -31,19 +31,19 @@ To install Nerd Fonts using the script:
 1. Download the script:
 
     ```bash
-    wget https://raw.githubusercontent.com/mcarvalho1/Nerd-fonts-Downloader-Script/main/nerd-fonts-downloader.sh
+    wget https://raw.githubusercontent.com/mcarvalho1/Nerd-fonts-Downloader-Script/master/nf_downloader.sh
     ```
 
 2. Make the script executable:
 
     ```bash
-    chmod +x nerd-fonts-downloader.sh
+    chmod +x nf_downloader.sh
     ```
 
 3. Run the script:
 
     ```bash
-    ./nerd-fonts-downloader.sh
+    ./nf_downloader.sh
     ```
 
 ## Usage
@@ -63,7 +63,7 @@ Here are some examples of using the script:
 1. To install a Nerd Font, run the script and follow the prompts:
 
     ```bash
-    ./nerd-fonts-downloader.sh
+    ./nf_downloader.sh
     ```
 
     Select your base distribution, then choose the font by entering its corresponding number when prompted. Afterward, you will be asked to choose the extension (`zip` or `tar.xz`).
@@ -73,7 +73,7 @@ Here are some examples of using the script:
 2. For another installation, run the script again:
 
     ```bash
-    ./nerd-fonts-downloader.sh
+    ./nf_downloader.sh
     ```
 
     Repeat the steps to select a different font or extension.
