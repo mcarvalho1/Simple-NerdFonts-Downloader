@@ -120,59 +120,49 @@ for dep in "${dependencies[@]}"; do
     install_dependency "$dep"
 done
 
-echo "Choose the font to install:"
+echo "Choose the font to install or select 'All' to download all fonts:"
 for i in "${!fonts[@]}"; do
     echo "[$((i+1))] - ${fonts[$i]}"
 done
+echo "[${#fonts[@]}+1] - All Fonts"
 
-read -p "Enter the number of the desired font: " choice
+read -p "Enter your choice: " choice
 
-if ! [[ "$choice" =~ ^[1-9][0-9]*$ && "$choice" -le ${#fonts[@]} ]]; then
-    echo "Invalid choice. Exiting."
-    exit 1
-fi
+download_and_install_font() {
+    local selected_font="$1"
+    local zip_file="${selected_font}${extension}"
+    local download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/${github_version}/${zip_file}"
+    echo "Downloading and installing '$selected_font'..."
 
-selected_font="${fonts[$((choice-1))]}"
+    wget --quiet "$download_url" -O "$zip_file" || { echo "Error: Unable to download '$selected_font'."; return 1; }
 
-echo "Choose the extension to install:"
-echo "[1] - .zip"
-echo "[2] - .tar.xz"
+    if [[ "$extension" == ".zip" ]]; then
+        unzip -q "$zip_file" -d "${HOME}/.local/share/fonts" || { echo "Error: Unable to extract '$selected_font'."; return 1; }
+    else
+        tar -xf "$zip_file" -C "${HOME}/.local/share/fonts" || { echo "Error: Unable to extract '$selected_font'."; return 1; }
+    fi
 
-read -p "Enter the number of the desired extension: " extension_choice
+    rm "$zip_file"
+    echo "'$selected_font' installed successfully."
+}
 
-if ! [[ "$extension_choice" =~ ^[1-2]$ ]]; then
-    echo "Invalid extension choice. Exiting."
-    exit 1
-fi
-
-case "$extension_choice" in
-    1) extension=".zip";;
-    2) extension=".tar.xz";;
-esac
-
-if [[ ! " ${fonts[@]} " =~ " ${selected_font} " ]]; then
-    echo "Font '$selected_font' not found. Exiting."
-    exit 1
-fi
-
-zip_file="${selected_font}${extension}"
-github_version='v3.1.1' # Need to update this manually when a new version is released.
-download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/${github_version}/${zip_file}"
-echo "Downloading and installing the font... This may take a moment."
-
-wget --quiet "$download_url" -O "$zip_file" || { echo "Error: Unable to download the font. Exiting."; exit 1; }
-
-if [[ "$extension" == ".zip" ]]; then
-    unzip -q "$zip_file" -d "${HOME}/.local/share/fonts" || { echo "Error: Unable to extract the font. Exiting."; exit 1; }
+if [ "$choice" -eq "${#fonts[@]}+1" ]; then
+    for font in "${fonts[@]}"; do
+        download_and_install_font "$font"
+    done
 else
-    tar -xf "$zip_file" -C "${HOME}/.local/share/fonts" || { echo "Error: Unable to extract the font. Exiting."; exit 1; }
-fi
+    if ! [[ "$choice" =~ ^[1-9][0-9]*$ && "$choice" -le ${#fonts[@]} ]]; then
+        echo "Invalid choice. Exiting."
+        exit 1
+    fi
 
-rm "$zip_file"
+    selected_font="${fonts[$((choice-1))]}"
+    download_and_install_font "$selected_font"
+fi
 
 if command -v fc-cache &> /dev/null; then
     fc-cache -f > /dev/null || { echo "Error: Unable to update font cache. Exiting."; exit 1; }
-    echo "Font '$selected_font' installed successfully 😎"
+    echo "Font cache updated."
 else
     echo "Command 'fc-cache' not found. Make sure to have the necessary dependencies installed to update the font cache."
 fi
