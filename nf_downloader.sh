@@ -1,5 +1,6 @@
 #!/bin/bash
 
+declare distro extension font_choice version
 declare -a fonts=(
   0xProto
   3270
@@ -68,14 +69,6 @@ declare -a fonts=(
   VictorMono
 )
 
-declare -a versions=(
-  3.1.1
-  3.1.0
-  3.0.2
-  3.0.1
-  3.0.0
-)
-
 # Functions to install dependencies on different distros.
 install_dependencies_debian() {
   sudo apt-get update
@@ -90,111 +83,123 @@ install_dependencies_arch() {
   sudo pacman -Sy --noconfirm wget unzip tar fontconfig
 }
 
-install_dependency() {
-  local dependency=$1
+install_dependencies_osx() {
+  yes | brew install wget unzip gnu-tar fontconfig
 
-  if ! command -v "$dependency" &> /dev/null; then
-I     read -p "The '$dependency' command is not installed. Do you want to install it? (y/n): " install_dependency_choice     ■ read without -r will mangle backslashes.
-    if [ "$install_dependency_choice" == "y" ]; then
-      case $distro in
-        "debian") install_dependencies_debian ;;
-        "fedora") install_dependencies_fedora ;;
-        "arch") install_dependencies_arch ;;
-        *) echo "Unsupported distribution. Exiting."; exit 1 ;;
-      esac
-    else
-      echo "Exiting. Make sure to have '$dependency' installed to continue."
-      exit 1
-    fi
+  status=$?
+  if [ $status -eq 1 ]; then exit 1; fi
+}
+
+install_dependencies() {
+  read -rp "Installing: wget, unzip, tar, fontconfig. Do you want to continue? (y/n): " install_dependency_choice
+
+  if [ "$install_dependency_choice" == "y" ]; then
+    case $distro in
+      "debian") install_dependencies_debian ;;
+      "fedora") install_dependencies_fedora ;;
+      "arch") install_dependencies_arch ;;
+      "osx") install_dependencies_osx ;;
+      *) echo "Unsupported distribution. Exiting."; exit 1 ;;
+    esac
+  else
+    echo "Exiting. Make sure to have the dependencies installed to continue."
+    exit 1
   fi
 }
 
-echo "Select your base distribution:"
-echo "[1] - Debian/Ubuntu"
-echo "[2] - Fedora"
-echo "[3] - Arch Linux"
+# Functions to make selections
+choose_distro() {
+  echo "Select your base distribution:"
+  echo "[1] - Debian/Ubuntu"
+  echo "[2] - Fedora"
+  echo "[3] - Arch: Linux"
+  echo "[4] - OSX"
 
-read -rp "Enter the number of your base distribution: " distro_choice
+  read -rp "Enter the number of your base distribution: " distro_choice
 
-case "$distro_choice" in
-  1) distro="debian";;
-  2) distro="fedora";;
-  3) distro="arch";;
-  *) echo "Invalid choice. Exiting."; exit 1 ;;
-esac
+  case "$distro_choice" in
+    1) distro="debian";;
+    2) distro="fedora";;
+    3) distro="arch";;
+    4) distro="osx";;
+    *) echo "Invalid choice. Exiting."; exit 1 ;;
+  esac
+}
 
-dependencies=("wget" "unzip" "tar" "fc-cache")
-for dep in "${dependencies[@]}"; do
-  install_dependency "$dep"
-done
+choose_font() {
+  echo "Choose the font to install or select 'All' to download all fonts:"
+  for i in "${!fonts[@]}"; do
+    echo "[$((i+1))] - ${fonts[$i]}"
+  done
 
-echo "Choose the font to install or select 'All' to download all fonts:"
-for i in "${!fonts[@]}"; do
-  echo "[$((i+1))] - ${fonts[$i]}"
-done
+  echo "[$((${#fonts[@]} + 1))] - All Fonts"
 
-echo "[$((${#fonts[@]} + 1))] - All Fonts"
+  read -rp "Enter your choice: " font_choice
+}
 
-read -rp "Enter your choice: " font_choice
+choose_extension() {
+  echo "Choose the extension to install:"
+  echo "[1] - .zip"
+  echo "[2] - .tar.xz"
 
-echo "Choose the extension to install:"
-echo "[1] - .zip"
-echo "[2] - .tar.xz"
+  read -rp "Enter the number of the desired extension: " extension_choice
 
-read -rp "Enter the number of the desired extension: " extension_choice
-
-if ! [[ "$extension_choice" =~ ^[1-2]$ ]]; then
-  echo "Invalid extension choice. Exiting."
-  exit 1
-fi
+  if ! [[ "$extension_choice" =~ ^[1-2]$ ]]; then
+    echo "Invalid extension choice. Exiting."
+    exit 1
+  fi
 
 
-case "$extension_choice" in
-  1) extension=".zip";;
-  2) extension=".tar.xz";;
-esac
+  case "$extension_choice" in
+    1) extension=".zip";;
+    2) extension=".tar.xz";;
+  esac
+}
 
-echo "Choose version to install:"
-for i in "${!versions[@]}"; do
-  echo "[$((i+1))] - ${versions[$i]}"
-done
+choose_version() {
+  latest_version=$(curl -s "https://api.github.com/repos/ryanoasis/nerd-fonts/tags" | jq -r '.[0].name')
 
-read -rp "Enter your choice: " version_choice
+  echo "Choose version to install, enter a specific version using the vX.Y.Z format (latest version: $latest_version)"
+  read -rp "Enter your choice: " version
+}
 
 download_and_install_font() {
   local selected_font="$1"
   local extension="$2"
   local version="$3"
+  local distro="$4"
   local zip_file="${selected_font}${extension}"
-  local download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${zip_file}"
+  local download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/${zip_file}"
+  local font_dir=""
 
-  echo "$zip_file"
-  echo "$download_url"
+  case $distro in
+    "osx") font_dir="/Library/Fonts";;
+    *) font_dir="${HOME}/.local/share/fonts";;
+  esac
 
   echo "Downloading and installing '$selected_font'..."
 
   wget --quiet "$download_url" -O "$zip_file" || { echo "Error: Unable to download '$selected_font'."; return 1; }
 
   if [[ "$extension" == ".zip" ]]; then
-    unzip -q "$zip_file" -d "${HOME}/.local/share/fonts" || { echo "Error: Unable to extract '$selected_font'."; return 1; }
+    unzip -q "$zip_file" -d "$font_dir" || { echo "Error: Unable to extract '$selected_font'."; return 1; }
   else
-    tar -xf "$zip_file" -C "${HOME}/.local/share/fonts" || { echo "Error: Unable to extract '$selected_font'."; return 1; }
+    tar -xf "$zip_file" -C "$font_dir" || { echo "Error: Unable to extract '$selected_font'."; return 1; }
   fi
 
   rm "$zip_file"
   echo "'$selected_font' installed successfully."
 }
 
-if ! [[ "$version_choice" =~ ^[1-9][0-9]*$ && "$version_choice" -le ${#versions[@]} ]]; then
-  echo "Invalid version choice. Exiting."
-  exit 1
-fi
+choose_distro
+install_dependencies
+choose_font
+choose_extension
+choose_version
 
-version="${versions[$((version_choice-1))]}"
-
-if [ "$font_choice" -eq "${#fonts[@]}+1" ]; then
+if [ "$font_choice" -eq "$((${#fonts[@]} + 1))" ]; then
   for font in "${fonts[@]}"; do
-    download_and_install_font "$font", ".zip", "$version"
+    download_and_install_font "$font" "$extension" "$version" "$distro"
   done
 else
   if ! [[ "$font_choice" =~ ^[1-9][0-9]*$ && "$font_choice" -le ${#fonts[@]} ]]; then
@@ -203,7 +208,7 @@ else
   fi
 
   selected_font="${fonts[$((font_choice-1))]}"
-  download_and_install_font "$selected_font" "$extension" "$version"
+  download_and_install_font "$selected_font" "$extension" "$version" "$distro"
 fi
 
 if command -v fc-cache &> /dev/null; then
