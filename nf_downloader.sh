@@ -174,7 +174,10 @@ download_and_install_font() {
 
   case $distro in
     "osx") font_dir="/Library/Fonts";;
-    *) font_dir="${HOME}/.local/share/fonts";;
+    *) 
+      font_dir="${HOME}/.local/share/fonts"
+      mkdir -p "$font_dir"
+      ;;
   esac
 
   echo "Downloading and installing '$selected_font'..."
