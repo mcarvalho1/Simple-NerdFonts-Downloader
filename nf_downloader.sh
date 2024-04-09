@@ -2,125 +2,112 @@
 
 declare distro extension font_choice version
 declare -a fonts=(
-  0xProto
-  3270
-  Agave
-  AnonymousPro
-  Arimo
-  AurulentSansMono
-  BigBlueTerminal
-  BitstreamVeraSansMono
-  CascadiaCode
-  CascadiaMono
-  CodeNewRoman
-  ComicShannsMono
-  CommitMono
-  Cousine
-  D2Coding
-  DaddyTimeMono
-  DejaVuSansMono
-  DroidSansMono
-  EnvyCodeR
-  FantasqueSansMono
-  FiraCode
-  FiraMono
-  FontPatcher
-  GeistMono
-  Go-Mono
-  Gohu
-  Hack
-  Hasklig
-  HeavyData
-  Hermit
-  iA-Writer
-  IBMPlexMono
-  Inconsolata
-  InconsolataGo
-  InconsolataLGC
-  IntelOneMono
-  Iosevka
-  IosevkaTerm
-  IosevkaTermSlab
-  JetBrainsMono
-  Lekton
-  LiberationMono
-  Lilex
-  MartianMono
-  Meslo
-  Monaspace
-  Monofur
-  Monoid
-  Mononoki
-  MPlus
-  NerdFontsSymbolsOnly
-  Noto
-  OpenDyslexic
-  Overpass
-  ProFont
-  ProggyClean
-  RobotoMono
-  ShareTechMono
-  SourceCodePro
-  SpaceMono
-  Terminus
-  Tinos
-  Ubuntu
-  UbuntuMono
-  VictorMono
+  "0xProto"
+  "3270"
+  "Agave"
+  "AnonymousPro"
+  "Arimo"
+  "AurulentSansMono"
+  "BigBlueTerminal"
+  "BitstreamVeraSansMono"
+  "CascadiaCode"
+  "CascadiaMono"
+  "CodeNewRoman"
+  "ComicShannsMono"
+  "CommitMono"
+  "Cousine"
+  "D2Coding"
+  "DaddyTimeMono"
+  "DejaVuSansMono"
+  "DroidSansMono"
+  "EnvyCodeR"
+  "FantasqueSansMono"
+  "FiraCode"
+  "FiraMono"
+  "FontPatcher"
+  "GeistMono"
+  "Go-Mono"
+  "Gohu"
+  "Hack"
+  "Hasklig"
+  "HeavyData"
+  "Hermit"
+  "iA-Writer"
+  "IBMPlexMono"
+  "Inconsolata"
+  "InconsolataGo"
+  "InconsolataLGC"
+  "IntelOneMono"
+  "Iosevka"
+  "IosevkaTerm"
+  "IosevkaTermSlab"
+  "JetBrainsMono"
+  "Lekton"
+  "LiberationMono"
+  "Lilex"
+  "MartianMono"
+  "Meslo"
+  "Monaspace"
+  "Monofur"
+  "Monoid"
+  "Mononoki"
+  "MPlus"
+  "NerdFontsSymbolsOnly"
+  "Noto"
+  "OpenDyslexic"
+  "Overpass"
+  "ProFont"
+  "ProggyClean"
+  "RobotoMono"
+  "ShareTechMono"
+  "SourceCodePro"
+  "SpaceMono"
+  "Terminus"
+  "Tinos"
+  "Ubuntu"
+  "UbuntuMono"
+  "VictorMono"
 )
 
-# Functions to install dependencies on different distros.
-install_message="Installing dependencies. Please wait..."
-
-install_dependencies_debian() {
-  echo "$install_message"
-  sudo apt-get update > /dev/null 2>&1
-  sudo apt-get install -y wget unzip tar fontconfig jq > /dev/null 2>&1
-}
-
-install_dependencies_fedora() {
-  echo "$install_message"
-  sudo dnf install -y wget unzip tar fontconfig jq > /dev/null 2>&1
-}
-
-install_dependencies_arch() {
-  echo "$install_message"
-  sudo pacman -Sy --noconfirm wget unzip tar fontconfig jq > /dev/null 2>&1
-}
-
-install_dependencies_osx() {
-  echo "$install_message"
-  yes | brew install wget unzip gnu-tar fontconfig jq > /dev/null 2>&1
-
-  status=$?
-  if [ $status -eq 1 ]; then exit 1; fi
-}
-
+# Function to install dependencies on different distros
 install_dependencies() {
-  read -rp "Installing: wget, unzip, tar, fontconfig and jq. Do you want to continue? (y/n): " install_dependency_choice
+  local dependencies=("wget" "unzip" "tar" "fontconfig" "jq")
+  local install_message="Installing dependencies. Please wait..."
 
-  if [ "$install_dependency_choice" == "y" ]; then
-    case $distro in
-      "debian") install_dependencies_debian ;;
-      "fedora") install_dependencies_fedora ;;
-      "arch") install_dependencies_arch ;;
-      "osx") install_dependencies_osx ;;
-      *) echo "Unsupported distribution. Exiting."; exit 1 ;;
-    esac
-  else
-    echo "Exiting. Make sure to have the dependencies installed to continue."
-    exit 1
-  fi
+  echo "$install_message"
+
+  case $distro in
+    "debian" | "ubuntu")
+      sudo apt-get update > /dev/null 2>&1
+      sudo apt-get install -y "${dependencies[@]}" > /dev/null 2>&1
+      ;;
+    "fedora")
+      sudo dnf install -y "${dependencies[@]}" > /dev/null 2>&1
+      ;;
+    "arch")
+      sudo pacman -Sy --noconfirm "${dependencies[@]}" > /dev/null 2>&1
+      ;;
+    "osx")
+      yes | brew install "${dependencies[@]}" > /dev/null 2>&1
+      ;;
+    *)
+      echo "Unsupported distribution. Exiting."
+      exit 1
+      ;;
+  esac
 }
 
-# Functions to make selections
+# Function to display distribution choices and select one
 choose_distro() {
+  local dependencies=("wget" "unzip" "tar" "fontconfig" "jq")
+
   echo "Select your base distribution:"
   echo "[1] - Debian/Ubuntu"
   echo "[2] - Fedora"
-  echo "[3] - Arch: Linux"
+  echo "[3] - Arch Linux"
   echo "[4] - OSX"
 
+  echo "We will install this necessary dependencies: ${dependencies[@]}."
   read -rp "Enter the number of your base distribution: " distro_choice
 
   case "$distro_choice" in
@@ -132,8 +119,10 @@ choose_distro() {
   esac
 }
 
+# Function to select font
 choose_font() {
   echo "Choose the font to install or select 'All' to download all fonts:"
+
   for i in "${!fonts[@]}"; do
     echo "[$((i+1))] - ${fonts[$i]}"
   done
@@ -143,6 +132,7 @@ choose_font() {
   read -rp "Enter your choice: " font_choice
 }
 
+# Function to select extension
 choose_extension() {
   echo "Choose the extension to install:"
   echo "[1] - .zip"
@@ -150,40 +140,33 @@ choose_extension() {
 
   read -rp "Enter the number of the desired extension: " extension_choice
 
-  if ! [[ "$extension_choice" =~ ^[1-2]$ ]]; then
-    echo "Invalid extension choice. Exiting."
-    exit 1
-  fi
-
-
   case "$extension_choice" in
     1) extension=".zip";;
     2) extension=".tar.xz";;
+    *) echo "Invalid extension choice. Exiting."; exit 1 ;;
   esac
 }
 
+# Function to select font version
 choose_version() {
   latest_version=$(curl -s "https://api.github.com/repos/ryanoasis/nerd-fonts/tags" | jq -r '.[0].name')
 
-  echo "Choose version to install, enter a specific version using the vX.Y.Z format (latest Nerd Font version: $latest_version)"
-  read -rp "Enter your choice: " version
+  echo "Choose the version to install (latest Nerd Font version: $latest_version)"
+  read -rp "Enter the version (press Enter for the latest version): " version
+
+  version="${version:-$latest_version}"
 }
 
+# Function to download and install font
 download_and_install_font() {
   local selected_font="$1"
-  local extension="$2"
-  local version="$3"
-  local distro="$4"
   local zip_file="${selected_font}${extension}"
   local download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/${zip_file}"
   local font_dir=""
 
   case $distro in
     "osx") font_dir="/Library/Fonts";;
-    *) 
-      font_dir="${HOME}/.local/share/fonts"
-      mkdir -p "$font_dir"
-      ;;
+    *) font_dir="${HOME}/.local/share/fonts"; mkdir -p "$font_dir";;
   esac
 
   echo "Downloading and installing '$selected_font'..."
@@ -200,6 +183,7 @@ download_and_install_font() {
   echo "'$selected_font' installed successfully."
 }
 
+# Main script logic
 choose_distro
 install_dependencies
 choose_font
@@ -208,16 +192,11 @@ choose_version
 
 if [ "$font_choice" -eq "$((${#fonts[@]} + 1))" ]; then
   for font in "${fonts[@]}"; do
-    download_and_install_font "$font" "$extension" "$version" "$distro"
+    download_and_install_font "$font"
   done
 else
-  if ! [[ "$font_choice" =~ ^[1-9][0-9]*$ && "$font_choice" -le ${#fonts[@]} ]]; then
-    echo "Invalid font choice. Exiting."
-    exit 1
-  fi
-
   selected_font="${fonts[$((font_choice-1))]}"
-  download_and_install_font "$selected_font" "$extension" "$version" "$distro"
+  download_and_install_font "$selected_font"
 fi
 
 if command -v fc-cache &> /dev/null; then

@@ -15,6 +15,7 @@ _Note: If you already have one, it will proceed with the process._
 - `unzip`
 - `tar`
 - `fontconfig`
+- `jq`
 
 ### Supported Distributions
 
@@ -23,6 +24,7 @@ The script supports the following base distributions:
 - `Debian/Ubuntu`
 - `Fedora`
 - `Arch Linux`
+- `OSX`
 
 ### Download and Run
 
