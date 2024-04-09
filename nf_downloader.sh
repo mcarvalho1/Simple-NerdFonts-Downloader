@@ -70,28 +70,34 @@ declare -a fonts=(
 )
 
 # Functions to install dependencies on different distros.
+install_message="Installing dependencies. Please wait..."
+
 install_dependencies_debian() {
-  sudo apt-get update
-  sudo apt-get install -y wget unzip tar fontconfig
+  echo "$install_message"
+  sudo apt-get update > /dev/null 2>&1
+  sudo apt-get install -y wget unzip tar fontconfig jq > /dev/null 2>&1
 }
 
 install_dependencies_fedora() {
-  sudo dnf install -y wget unzip tar fontconfig
+  echo "$install_message"
+  sudo dnf install -y wget unzip tar fontconfig jq > /dev/null 2>&1
 }
 
 install_dependencies_arch() {
-  sudo pacman -Sy --noconfirm wget unzip tar fontconfig
+  echo "$install_message"
+  sudo pacman -Sy --noconfirm wget unzip tar fontconfig jq > /dev/null 2>&1
 }
 
 install_dependencies_osx() {
-  yes | brew install wget unzip gnu-tar fontconfig
+  echo "$install_message"
+  yes | brew install wget unzip gnu-tar fontconfig jq > /dev/null 2>&1
 
   status=$?
   if [ $status -eq 1 ]; then exit 1; fi
 }
 
 install_dependencies() {
-  read -rp "Installing: wget, unzip, tar, fontconfig. Do you want to continue? (y/n): " install_dependency_choice
+  read -rp "Installing: wget, unzip, tar, fontconfig and jq. Do you want to continue? (y/n): " install_dependency_choice
 
   if [ "$install_dependency_choice" == "y" ]; then
     case $distro in
@@ -159,7 +165,7 @@ choose_extension() {
 choose_version() {
   latest_version=$(curl -s "https://api.github.com/repos/ryanoasis/nerd-fonts/tags" | jq -r '.[0].name')
 
-  echo "Choose version to install, enter a specific version using the vX.Y.Z format (latest version: $latest_version)"
+  echo "Choose version to install, enter a specific version using the vX.Y.Z format (latest Nerd Font version: $latest_version)"
   read -rp "Enter your choice: " version
 }
 
