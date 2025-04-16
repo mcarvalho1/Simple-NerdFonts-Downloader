@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 declare distro extension font_choice version
 declare -a fonts=(
