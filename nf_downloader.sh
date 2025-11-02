@@ -4,9 +4,11 @@ declare distro extension font_choice version
 declare -a fonts=(
   "0xProto"
   "3270"
+  "AdwaitaMono"
   "Agave"
   "AnonymousPro"
   "Arimo"
+  "AtkinsonHyperlegibleMono"
   "AurulentSansMono"
   "BigBlueTerminal"
   "BitstreamVeraSansMono"
@@ -19,6 +21,7 @@ declare -a fonts=(
   "D2Coding"
   "DaddyTimeMono"
   "DejaVuSansMono"
+  "DepartureMono"
   "DroidSansMono"
   "EnvyCodeR"
   "FantasqueSansMono"
@@ -58,6 +61,7 @@ declare -a fonts=(
   "Overpass"
   "ProFont"
   "ProggyClean"
+  "Recursive"
   "RobotoMono"
   "ShareTechMono"
   "SourceCodePro"
@@ -66,7 +70,9 @@ declare -a fonts=(
   "Tinos"
   "Ubuntu"
   "UbuntuMono"
+  "UbuntuSans"
   "VictorMono"
+  "ZedMono"
 )
 
 # Function to install dependencies on different distros
