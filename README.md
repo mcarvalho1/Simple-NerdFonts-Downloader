@@ -16,6 +16,7 @@ _Note: If you already have one, it will proceed with the process._
 - `tar`
 - `fontconfig`
 - `jq`
+- `curl` 
 
 ### Supported Distributions
 
