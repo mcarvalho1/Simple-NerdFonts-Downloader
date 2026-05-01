@@ -71,7 +71,7 @@ declare -a fonts=(
 
 # Function to install dependencies on different distros
 install_dependencies() {
-  local dependencies=("wget" "unzip" "tar" "fontconfig" "jq")
+  local dependencies=("curl" "wget" "unzip" "tar" "fontconfig" "jq")
   local install_message="Installing dependencies. Please wait..."
 
   echo "$install_message"
